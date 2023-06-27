@@ -3,7 +3,7 @@ import sqlite3
 # Connect to the SQLite databases
 conn_all_scores = sqlite3.connect('all_scores.db')
 conn_trivia_scores = sqlite3.connect('trivia/trivia_scores.db')
-conn_tictactoe_scores = sqlite3.connect('tictactoe/tictactoe_scores.db')
+conn_tictactoe_scores = sqlite3.connect('tictactoe/games.db')
 
 cursor_all_scores = conn_all_scores.cursor()
 cursor_trivia_scores = conn_trivia_scores.cursor()
@@ -42,7 +42,7 @@ cursor_all_scores.executemany(merge_trivia_scores_query, trivia_scores)
 
 # Select the scores from the tictactoe_scores table
 select_tictactoe_scores_query = '''
-SELECT username, tictactoe_score FROM tictactoe_scores
+SELECT player_name, player_wins FROM tic_tac_toe
 '''
 tictactoe_scores = cursor_tictactoe_scores.execute(select_tictactoe_scores_query).fetchall()
 
@@ -63,12 +63,12 @@ def print_highest_score(player_name):
     highest_tictactoe_score = highest_scores[1]
 
     if highest_trivia_score is not None:
-        print(f"Highest trivia score for {player_name}: {highest_trivia_score}")
+        print(f"Highest trivia score for {player_name}: {highest_trivia_score}/5")
     else:
         print("No past trivia scores found for the player.")
 
     if highest_tictactoe_score is not None:
-        print(f"Highest tictactoe score for {player_name}: {highest_tictactoe_score}")
+        print(f"Highest tictactoe score for {player_name}: {highest_tictactoe_score} wins")
     else:
         print("No past tictactoe scores found for the player.")
 
