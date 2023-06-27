@@ -6,9 +6,21 @@ from trivia_questions import questions
 conn = sqlite3.connect('trivia_scores.db')
 cursor = conn.cursor()
 
-# Create a table to store trivia scores if it doesn't exist
-cursor.execute('''CREATE TABLE IF NOT EXISTS trivia_scores
-             (username text, trivia_score int)''')
+# # Delete old table
+# cursor.execute("DROP TABLE IF EXISTS trivia_scores")
+
+# # Commit the changes of the table
+# conn.commit()
+
+# Create a new table to store the all scores
+create_table_query = '''
+CREATE TABLE IF NOT EXISTS trivia_scores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    trivia_score INTEGER
+)
+'''
+cursor.execute(create_table_query)
 
 def print_highest_score(player_name):
     # Query the database for the highest score of the specified player
@@ -91,27 +103,26 @@ for question in questions[selected_category][:total_num_questions]:
     # Increment the question number
     question_num += 1
 
-# Store the user's score in the database
-cursor.execute("INSERT INTO trivia_scores VALUES (?, ?)", (player_name, score))
-conn.commit()
+# Check if the username exists in the table
+check_username_query = "SELECT * FROM trivia_scores WHERE username = ?"
+cursor.execute(check_username_query, (player_name,))
+existing_user = cursor.fetchone()
+
+if existing_user:
+    # Username already exists, check if the new score is higher
+    if score > existing_user[2]:
+        # Update the score for the existing username
+        update_score_query = "UPDATE trivia_scores SET trivia_score = ? WHERE username = ?"
+        cursor.execute(update_score_query, (score, player_name))
+        conn.commit()
+else:
+    # Username doesn't exist, insert a new row
+    insert_score_query = "INSERT INTO trivia_scores (username, trivia_score) VALUES (?, ?)"
+    cursor.execute(insert_score_query, (player_name, score))
+    conn.commit()
 
 # Print the final score
 print(f"Quiz complete! Your score is: {score}/{total_num_questions}")
-
-# def delete_all_scores():
-#     # Execute an SQL statement to delete all records from the "trivia_scores" table
-#     cursor.execute("DELETE FROM trivia_scores")
-#     conn.commit()
-#     print("All scores have been deleted.")
-
-# # Call the function to delete all scores
-# delete_all_scores()
-
-# # Execute the SQL statement to delete an old table called "scores"
-# cursor.execute("DROP TABLE IF EXISTS scores")
-
-# # Commit the changes of the table
-# conn.commit()
 
 # Close the database connection
 conn.close()

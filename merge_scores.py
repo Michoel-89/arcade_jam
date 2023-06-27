@@ -18,7 +18,8 @@ conn_all_scores.commit()
 # Create a new table to store the all scores
 create_table_query = '''
 CREATE TABLE all_scores (
-    username TEXT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
     trivia_score INTEGER,
     tictactoe_score INTEGER
 )
