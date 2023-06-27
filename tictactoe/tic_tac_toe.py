@@ -1,3 +1,6 @@
+from create_table import Game, session
+
+
 # Initialize the board the underscore is not being used it's just there as a placeholder
 board = [" " for _ in range(9)]
 # board looks like this after creation [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '] a list of empty strings
@@ -71,23 +74,57 @@ def play_game():
     player2_name = input("Enter name for Player 2: ")
     player1 = 'X'
     player2 = 'O'
+    
+    # Retrieve the game for player 1 from the database
+    game1 = session.query(Game).filter_by(player_name=player1_name).first()
+    
+    # Create a new game for player 1 if it doesn't exist
+    if game1 is None:
+        game1 = Game(player_name=player1_name, player_wins=0, player_losses=0, player_draws=0)
+        session.add(game1)
+    
+    # Retrieve the game for player 2 from the database
+    game2 = session.query(Game).filter_by(player_name=player2_name).first()
+    
+    # Create a new game for player 2 if it doesn't exist
+    if game2 is None:
+        game2 = Game(player_name=player2_name, player_wins=0, player_losses=0, player_draws=0)
+        session.add(game2)
+    
     while True:
         make_move(player1_name, player1)
         print_board()
         if check_winner(player1):
             print("Player", player1_name, "wins!\nPlayer", player2_name, "loses.")
+            # Update player 1's wins and player 2's losses
+            game1.player_wins += 1
+            game2.player_losses += 1
+            session.commit()
             break
         elif is_board_full():
             print("It's a tie!")
+            # Update both players' draws
+            game1.player_draws += 1
+            game2.player_draws += 1
+            session.commit()
             break
         make_move(player2_name, player2)
         print_board()
         if check_winner(player2):
             print("Player", player2_name, "wins!\nPlayer", player1_name, "loses.")
+            # Update player 2's wins and player 1's losses
+            game2.player_wins += 1
+            game1.player_losses += 1
+            session.commit()
             break
         elif is_board_full():
             print("It's a tie!")
+            # Update both players' draws
+            game1.player_draws += 1
+            game2.player_draws += 1
+            session.commit()
             break
+
 
 # Start the game
 play_game()
