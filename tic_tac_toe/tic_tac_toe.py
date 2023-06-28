@@ -75,18 +75,18 @@ def play_game():
     player1 = 'X'
     player2 = 'O'
     
-    # Retrieve the game for player 1 from the database
+    # Retrieve the game for player 1 from the database saves the player to the game1 variable
     game1 = session.query(Game).filter_by(player_name=player1_name).first()
     
-    # Create a new game for player 1 if it doesn't exist
+    # Create a new game for player 1 if it doesn't exist uses the Game constructor to create a new player
     if game1 is None:
         game1 = Game(player_name=player1_name, player_wins=0, player_losses=0, player_draws=0)
         session.add(game1)
     
-    # Retrieve the game for player 2 from the database
+    # Retrieve the game for player 2 from the database saves the player to the game2 variable
     game2 = session.query(Game).filter_by(player_name=player2_name).first()
     
-    # Create a new game for player 2 if it doesn't exist
+    # Create a new game for player 2 if it doesn't exist uses the Game constructor to create a new player
     if game2 is None:
         game2 = Game(player_name=player2_name, player_wins=0, player_losses=0, player_draws=0)
         session.add(game2)
