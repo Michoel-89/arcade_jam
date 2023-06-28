@@ -3,7 +3,7 @@ import random
 from trivia_questions import questions
 
 # Connect to the SQLite database
-conn = sqlite3.connect('trivia_scores.db')
+conn = sqlite3.connect('trivia/trivia_scores.db')
 cursor = conn.cursor()
 
 # # Delete old table
@@ -16,7 +16,7 @@ cursor = conn.cursor()
 create_table_query = '''
 CREATE TABLE IF NOT EXISTS trivia_scores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
+    username TEXT UNIQUE COLLATE NOCASE,
     trivia_score INTEGER
 )
 '''
@@ -24,7 +24,7 @@ cursor.execute(create_table_query)
 
 def print_highest_score(player_name):
     # Query the database for the highest score of the specified player
-    cursor.execute("SELECT MAX(trivia_score) FROM trivia_scores WHERE username=?", (player_name,))
+    cursor.execute("SELECT MAX(trivia_score) FROM trivia_scores WHERE username COLLATE NOCASE = ?", (player_name,))
     highest_score = cursor.fetchone()[0]
 
     if highest_score is not None:
@@ -103,8 +103,8 @@ for question in questions[selected_category][:total_num_questions]:
     # Increment the question number
     question_num += 1
 
-# Check if the username exists in the table
-check_username_query = "SELECT * FROM trivia_scores WHERE username = ?"
+# Check if the username exists in the table (case-insensitive)
+check_username_query = "SELECT * FROM trivia_scores WHERE username COLLATE NOCASE = ?"
 cursor.execute(check_username_query, (player_name,))
 existing_user = cursor.fetchone()
 
@@ -112,7 +112,7 @@ if existing_user:
     # Username already exists, check if the new score is higher
     if score > existing_user[2]:
         # Update the score for the existing username
-        update_score_query = "UPDATE trivia_scores SET trivia_score = ? WHERE username = ?"
+        update_score_query = "UPDATE trivia_scores SET trivia_score = ? WHERE username COLLATE NOCASE = ?"
         cursor.execute(update_score_query, (score, player_name))
         conn.commit()
 else:
