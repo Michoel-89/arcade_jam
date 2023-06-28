@@ -80,7 +80,7 @@ def play_game():
     
     # Create a new game for player 1 if it doesn't exist uses the Game constructor to create a new player
     if game1 is None:
-        game1 = Game(player_name=player1_name, player_wins=0, player_losses=0, player_draws=0)
+        game1 = Game(player_name=player1_name, player_wins=0, player_losses=0, player_draws=0, player_win_percentage=0)
         session.add(game1)
     
     # Retrieve the game for player 2 from the database saves the player to the game2 variable
@@ -88,7 +88,7 @@ def play_game():
     
     # Create a new game for player 2 if it doesn't exist uses the Game constructor to create a new player
     if game2 is None:
-        game2 = Game(player_name=player2_name, player_wins=0, player_losses=0, player_draws=0)
+        game2 = Game(player_name=player2_name, player_wins=0, player_losses=0, player_draws=0, player_win_percentage=0)
         session.add(game2)
     
     while True:
@@ -99,14 +99,22 @@ def play_game():
             # Update player 1's wins and player 2's losses
             game1.player_wins += 1
             game2.player_losses += 1
+            game1.player_win_percentage = (game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100
+            game2.player_win_percentage = (game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100
             session.commit()
+            print(f"Stats for {player1_name}:\n  Wins: {game1.player_wins},\n  Losses: {game1.player_losses},\n  draws: {game1.player_draws},\n  Win percentage: {(game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100:.2f}%.")
+            print(f"Stats for {player2_name}:\n  Wins: {game2.player_wins},\n  Losses: {game2.player_losses},\n  draws: {game2.player_draws},\n  Win percentage: {(game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100:.2f}%.")
             break
         elif is_board_full():
             print("It's a tie!")
             # Update both players' draws
             game1.player_draws += 1
             game2.player_draws += 1
+            game1.player_win_percentage = (game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100
+            game2.player_win_percentage = (game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100
             session.commit()
+            print(f"Stats for {player1_name}:\n  Wins: {game1.player_wins},\n  Losses: {game1.player_losses},\n  draws: {game1.player_draws},\n  Win percentage: {(game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100:.2f}%.")
+            print(f"Stats for {player2_name}:\n  Wins: {game2.player_wins},\n  Losses: {game2.player_losses},\n  draws: {game2.player_draws},\n  Win percentage: {(game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100:.2f}%.")
             break
         make_move(player2_name, player2)
         print_board()
@@ -115,14 +123,22 @@ def play_game():
             # Update player 2's wins and player 1's losses
             game2.player_wins += 1
             game1.player_losses += 1
+            game1.player_win_percentage = (game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100
+            game2.player_win_percentage = (game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100
             session.commit()
+            print(f"Stats for {player1_name}:\n  Wins: {game1.player_wins},\n  Losses: {game1.player_losses},\n  draws: {game1.player_draws},\n  Win percentage: {(game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100:.2f}%.")
+            print(f"Stats for {player2_name}:\n  Wins: {game2.player_wins},\n  Losses: {game2.player_losses},\n  draws: {game2.player_draws},\n  Win percentage: {(game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100:.2f}%.")
             break
         elif is_board_full():
             print("It's a tie!")
             # Update both players' draws
             game1.player_draws += 1
             game2.player_draws += 1
+            game1.player_win_percentage = (game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100
+            game2.player_win_percentage = (game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100
             session.commit()
+            print(f"Stats for {player1_name}:\n  Wins: {game1.player_wins},\n  Losses: {game1.player_losses},\n  draws: {game1.player_draws},\n  Win percentage: {(game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100:.2f}%.")
+            print(f"Stats for {player2_name}:\n  Wins: {game2.player_wins},\n  Losses: {game2.player_losses},\n  draws: {game2.player_draws},\n  Win percentage: {(game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100:.2f}%.")
             break
 
 
