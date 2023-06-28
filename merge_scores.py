@@ -3,11 +3,16 @@ import sqlite3
 # Connect to the SQLite databases
 conn_all_scores = sqlite3.connect('all_scores.db')
 conn_trivia_scores = sqlite3.connect('trivia/trivia_scores.db')
-conn_tictactoe_scores = sqlite3.connect('tictactoe/games.db')
+conn_tictactoe_scores = sqlite3.connect('tic_tac_toe/games.db')
 
+# Set the connection to use case-insensitive collation
 cursor_all_scores = conn_all_scores.cursor()
 cursor_trivia_scores = conn_trivia_scores.cursor()
 cursor_tictactoe_scores = conn_tictactoe_scores.cursor()
+
+# conn_all_scores.execute("PRAGMA case_sensitive_like=OFF")
+# conn_trivia_scores.execute("PRAGMA case_sensitive_like=OFF")
+# conn_tictactoe_scores.execute("PRAGMA case_sensitive_like=OFF")
 
 # Execute the SQL statement to delete old table
 cursor_all_scores.execute("DROP TABLE IF EXISTS all_scores")
@@ -19,7 +24,7 @@ conn_all_scores.commit()
 create_table_query = '''
 CREATE TABLE all_scores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
+    username TEXT UNIQUE COLLATE NOCASE,
     trivia_score INTEGER,
     tictactoe_score INTEGER
 )
@@ -56,8 +61,8 @@ cursor_all_scores.executemany(merge_tictactoe_scores_query, tictactoe_scores)
 
 # If the username exists, show the highest scores for each game
 def print_highest_score(player_name):
-    # Query the database for the highest scores of the specified player
-    cursor_all_scores.execute("SELECT MAX(trivia_score), MAX(tictactoe_score) FROM all_scores WHERE username=?", (player_name,))
+    # Query the database for the highest scores of the specified player (case-insensitive)
+    cursor_all_scores.execute("SELECT MAX(trivia_score), MAX(tictactoe_score) FROM all_scores WHERE username COLLATE NOCASE=?", (player_name,))
     highest_scores = cursor_all_scores.fetchone()
     highest_trivia_score = highest_scores[0]
     highest_tictactoe_score = highest_scores[1]
