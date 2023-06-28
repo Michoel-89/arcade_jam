@@ -3,61 +3,12 @@ import sqlite3
 # Connect to the SQLite databases
 conn_all_scores = sqlite3.connect('all_scores.db')
 conn_trivia_scores = sqlite3.connect('trivia/trivia_scores.db')
-conn_tictactoe_scores = sqlite3.connect('tic_tac_toe/games.db')
+conn_tictactoe_scores = sqlite3.connect('games.db')
 
 # Set the connection to use case-insensitive collation
 cursor_all_scores = conn_all_scores.cursor()
 cursor_trivia_scores = conn_trivia_scores.cursor()
 cursor_tictactoe_scores = conn_tictactoe_scores.cursor()
-
-# Execute the SQL statement to delete old table
-cursor_all_scores.execute("DROP TABLE IF EXISTS all_scores")
-
-# Commit the changes of deleting the table
-conn_all_scores.commit()
-
-# Create a new table to store all scores
-create_table_query = '''
-CREATE TABLE IF NOT EXISTS all_scores (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE COLLATE NOCASE,
-    trivia_score INTEGER,
-    tictactoe_score INTEGER
-)
-'''
-cursor_all_scores.execute(create_table_query)
-
-# Select the scores from the trivia_scores table
-select_trivia_scores_query = '''
-SELECT username, trivia_score FROM trivia_scores
-'''
-trivia_scores = cursor_trivia_scores.execute(select_trivia_scores_query).fetchall()
-
-# Insert the scores from the trivia_scores table into the all_scores table
-# If the same username exists, the DO UPDATE clause updates the trivia_score value instead of inserting a new row
-merge_trivia_scores_query = '''
-INSERT INTO all_scores (username, trivia_score) VALUES (?, ?)
-ON CONFLICT (username) DO UPDATE SET trivia_score = excluded.trivia_score
-'''
-cursor_all_scores.executemany(merge_trivia_scores_query, trivia_scores)
-
-# Select the scores from the tictactoe_scores table
-select_tictactoe_scores_query = '''
-SELECT player_name, player_wins FROM tic_tac_toe
-'''
-tictactoe_scores = cursor_tictactoe_scores.execute(select_tictactoe_scores_query).fetchall()
-
-# Insert or update the scores from the tictactoe_scores table into the all_scores table
-# If the same username exists, the DO UPDATE clause updates the tictactoe_score value instead of inserting a new row
-merge_tictactoe_scores_query = '''
-INSERT INTO all_scores (username, tictactoe_score) VALUES (?, ?)
-ON CONFLICT (username) DO UPDATE SET tictactoe_score = excluded.tictactoe_score
-'''
-cursor_all_scores.executemany(merge_tictactoe_scores_query, tictactoe_scores)
-
-# Commit the changes
-conn_all_scores.commit()
-
 
 # If the username exists, show the highest scores for each game
 def print_highest_score(player_name):
@@ -73,12 +24,16 @@ def print_highest_score(player_name):
         print("No past trivia scores found for the player.")
 
     if highest_tictactoe_score is not None:
-        print(f"Highest tictactoe score for {player_name}: {highest_tictactoe_score} wins")
+        print(f"Tic tac toe win percentage for {player_name}: {highest_tictactoe_score:.2f}%")
     else:
         print("No past tictactoe scores found for the player.")
 
 # Prompt the player to enter their name
 player_name = input("Enter your username: ")
+
+# Same player_name to txt file for use in other programs
+with open("player_name.txt", "w") as file:
+    file.write(player_name)          
 
 # Call the function to print the highest score for the player
 print_highest_score(player_name)

@@ -70,7 +70,10 @@ if all 4 conditions were didn't cause a break the loop will run again and again 
 def play_game():
     print("Welcome to Tic-Tac-Toe!")
     print_board()
-    player1_name = input("Enter name for Player 1: ")
+    # player1_name = input("Enter name for Player 1: ")
+    with open("player_name.txt", "r") as file:
+        player1_name = file.read()
+    print(f'Hello {player1_name}, you are Player 1.')
     player2_name = input("Enter name for Player 2: ")
     player1 = 'X'
     player2 = 'O'
@@ -80,7 +83,7 @@ def play_game():
     
     # Create a new game for player 1 if it doesn't exist uses the Game constructor to create a new player
     if game1 is None:
-        game1 = Game(player_name=player1_name, player_wins=0, player_losses=0, player_draws=0)
+        game1 = Game(player_name=player1_name, player_wins=0, player_losses=0, player_draws=0, player_win_percentage=0)
         session.add(game1)
     
     # Retrieve the game for player 2 from the database saves the player to the game2 variable
@@ -88,7 +91,7 @@ def play_game():
     
     # Create a new game for player 2 if it doesn't exist uses the Game constructor to create a new player
     if game2 is None:
-        game2 = Game(player_name=player2_name, player_wins=0, player_losses=0, player_draws=0)
+        game2 = Game(player_name=player2_name, player_wins=0, player_losses=0, player_draws=0, player_win_percentage=0)
         session.add(game2)
     
     while True:
@@ -99,14 +102,22 @@ def play_game():
             # Update player 1's wins and player 2's losses
             game1.player_wins += 1
             game2.player_losses += 1
+            game1.player_win_percentage = (game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100
+            game2.player_win_percentage = (game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100
             session.commit()
+            print(f"Stats for {player1_name}:\n  Wins: {game1.player_wins},\n  Losses: {game1.player_losses},\n  draws: {game1.player_draws},\n  Win percentage: {(game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100:.2f}%.")
+            print(f"Stats for {player2_name}:\n  Wins: {game2.player_wins},\n  Losses: {game2.player_losses},\n  draws: {game2.player_draws},\n  Win percentage: {(game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100:.2f}%.")
             break
         elif is_board_full():
             print("It's a tie!")
             # Update both players' draws
             game1.player_draws += 1
             game2.player_draws += 1
+            game1.player_win_percentage = (game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100
+            game2.player_win_percentage = (game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100
             session.commit()
+            print(f"Stats for {player1_name}:\n  Wins: {game1.player_wins},\n  Losses: {game1.player_losses},\n  draws: {game1.player_draws},\n  Win percentage: {(game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100:.2f}%.")
+            print(f"Stats for {player2_name}:\n  Wins: {game2.player_wins},\n  Losses: {game2.player_losses},\n  draws: {game2.player_draws},\n  Win percentage: {(game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100:.2f}%.")
             break
         make_move(player2_name, player2)
         print_board()
@@ -115,16 +126,89 @@ def play_game():
             # Update player 2's wins and player 1's losses
             game2.player_wins += 1
             game1.player_losses += 1
+            game1.player_win_percentage = (game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100
+            game2.player_win_percentage = (game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100
             session.commit()
+            print(f"Stats for {player1_name}:\n  Wins: {game1.player_wins},\n  Losses: {game1.player_losses},\n  draws: {game1.player_draws},\n  Win percentage: {(game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100:.2f}%.")
+            print(f"Stats for {player2_name}:\n  Wins: {game2.player_wins},\n  Losses: {game2.player_losses},\n  draws: {game2.player_draws},\n  Win percentage: {(game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100:.2f}%.")
             break
         elif is_board_full():
             print("It's a tie!")
             # Update both players' draws
             game1.player_draws += 1
             game2.player_draws += 1
+            game1.player_win_percentage = (game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100
+            game2.player_win_percentage = (game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100
             session.commit()
+            print(f"Stats for {player1_name}:\n  Wins: {game1.player_wins},\n  Losses: {game1.player_losses},\n  draws: {game1.player_draws},\n  Win percentage: {(game1.player_wins/(game1.player_wins + game1.player_losses + game1.player_draws)) * 100:.2f}%.")
+            print(f"Stats for {player2_name}:\n  Wins: {game2.player_wins},\n  Losses: {game2.player_losses},\n  draws: {game2.player_draws},\n  Win percentage: {(game2.player_wins/(game2.player_wins + game2.player_losses + game2.player_draws)) * 100:.2f}%.")
             break
-
 
 # Start the game
 play_game()
+import sqlite3
+
+# Connect to the SQLite databases
+conn_all_scores = sqlite3.connect('./all_scores.db')
+conn_trivia_scores = sqlite3.connect('./trivia/trivia_scores.db')
+conn_tictactoe_scores = sqlite3.connect('./games.db')
+
+# Set the connection to use case-insensitive collation
+cursor_all_scores = conn_all_scores.cursor()
+cursor_trivia_scores = conn_trivia_scores.cursor()
+cursor_tictactoe_scores = conn_tictactoe_scores.cursor()
+
+# Execute the SQL statement to delete old table
+cursor_all_scores.execute("DROP TABLE IF EXISTS all_scores")
+
+# Commit the changes of deleting the table
+conn_all_scores.commit()
+
+# Create a new table to store all scores
+create_table_query = '''
+CREATE TABLE IF NOT EXISTS all_scores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE COLLATE NOCASE,
+    trivia_score INTEGER,
+    tictactoe_score DECIMAL
+)
+'''
+cursor_all_scores.execute(create_table_query)
+
+# Select the scores from the trivia_scores table
+select_trivia_scores_query = '''
+SELECT username, trivia_score FROM trivia_scores
+'''
+trivia_scores = cursor_trivia_scores.execute(select_trivia_scores_query).fetchall()
+
+# Insert the scores from the trivia_scores table into the all_scores table
+# If the same username exists, the DO UPDATE clause updates the trivia_score value instead of inserting a new row
+merge_trivia_scores_query = '''
+INSERT INTO all_scores (username, trivia_score) VALUES (?, ?)
+ON CONFLICT (username) DO UPDATE SET trivia_score = excluded.trivia_score
+'''
+cursor_all_scores.executemany(merge_trivia_scores_query, trivia_scores)
+
+# Select the scores from the tictactoe_scores table
+select_tictactoe_scores_query = '''
+SELECT player_name, player_win_percentage FROM tic_tac_toe
+'''
+tictactoe_scores = cursor_tictactoe_scores.execute(select_tictactoe_scores_query).fetchall()
+
+# Insert or update the scores from the tictactoe_scores table into the all_scores table
+# If the same username exists, the DO UPDATE clause updates the tictactoe_score value instead of inserting a new row
+merge_tictactoe_scores_query = '''
+INSERT INTO all_scores (username, tictactoe_score) VALUES (?, ?)
+ON CONFLICT (username) DO UPDATE SET tictactoe_score = excluded.tictactoe_score
+'''
+cursor_all_scores.executemany(merge_tictactoe_scores_query, tictactoe_scores)
+
+# Commit the changes
+conn_all_scores.commit()
+
+# Close the connections
+conn_all_scores.close()
+conn_trivia_scores.close()
+conn_tictactoe_scores.close()
+
+
