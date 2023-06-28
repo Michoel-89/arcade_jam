@@ -3,14 +3,14 @@ import random
 from trivia_questions import questions
 
 # Connect to the SQLite database
-conn = sqlite3.connect('trivia/trivia_scores.db')
-cursor = conn.cursor()
+conn_trivia_scores = sqlite3.connect('trivia/trivia_scores.db')
+cursor_trivia_scores = conn_trivia_scores.cursor()
 
 # # Delete old table
 # cursor.execute("DROP TABLE IF EXISTS trivia_scores")
 
 # # Commit the changes of the table
-# conn.commit()
+# conn_trivia_scores.commit()
 
 # Create a new table to store the all scores
 create_table_query = '''
@@ -20,17 +20,17 @@ CREATE TABLE IF NOT EXISTS trivia_scores (
     trivia_score INTEGER
 )
 '''
-cursor.execute(create_table_query)
+cursor_trivia_scores.execute(create_table_query)
 
-def print_highest_score(player_name):
-    # Query the database for the highest score of the specified player
-    cursor.execute("SELECT MAX(trivia_score) FROM trivia_scores WHERE username COLLATE NOCASE = ?", (player_name,))
-    highest_score = cursor.fetchone()[0]
+# def print_highest_score(player_name):
+#     # Query the database for the highest score of the specified player
+#     cursor.execute("SELECT MAX(trivia_score) FROM trivia_scores WHERE username COLLATE NOCASE = ?", (player_name,))
+#     highest_score = cursor.fetchone()[0]
 
-    if highest_score is not None:
-        print(f"Highest score for {player_name}: {highest_score}")
-    else:
-        print("No past scores found for the player.")
+#     if highest_score is not None:
+#         print(f"Highest score for {player_name}: {highest_score}")
+#     else:
+#         print("No past scores found for the player.")
 
 # # Prompt the player to enter their name
 # player_name = input("Enter your username: ")
@@ -109,29 +109,29 @@ for question in questions[selected_category][:total_num_questions]:
 
 # Check if the username exists in the table (case-insensitive)
 check_username_query = "SELECT * FROM trivia_scores WHERE username COLLATE NOCASE = ?"
-cursor.execute(check_username_query, (player_name,))
-existing_user = cursor.fetchone()
+cursor_trivia_scores.execute(check_username_query, (player_name,))
+existing_user = cursor_trivia_scores.fetchone()
 
 if existing_user:
     # Username already exists, check if the new score is higher
     if score > existing_user[2]:
         # Update the score for the existing username
         update_score_query = "UPDATE trivia_scores SET trivia_score = ? WHERE username COLLATE NOCASE = ?"
-        cursor.execute(update_score_query, (score, player_name))
-        conn.commit()
+        cursor_trivia_scores.execute(update_score_query, (score, player_name))
+        conn_trivia_scores.commit()
 else:
     # Username doesn't exist, insert a new row
     insert_score_query = "INSERT INTO trivia_scores (username, trivia_score) VALUES (?, ?)"
-    cursor.execute(insert_score_query, (player_name, score))
-    conn.commit()
+    cursor_trivia_scores.execute(insert_score_query, (player_name, score))
+    conn_trivia_scores.commit()
 
 # Print the final score
 print(f"Quiz complete! Your score is: {score}/{total_num_questions}")
 import sqlite3
 
+
 # Connect to the SQLite databases
 conn_all_scores = sqlite3.connect('all_scores.db')
-conn_trivia_scores = sqlite3.connect('trivia/trivia_scores.db')
 conn_tictactoe_scores = sqlite3.connect('games.db')
 
 # Set the connection to use case-insensitive collation
@@ -187,12 +187,12 @@ cursor_all_scores.executemany(merge_tictactoe_scores_query, tictactoe_scores)
 # Commit the changes
 conn_all_scores.commit()
 
-# Close the database connection
-conn.close()
 # Close the connections
 conn_all_scores.close()
 conn_trivia_scores.close()
 conn_tictactoe_scores.close()
+
+# Return to main menu
 print() # Add line break
 print() # Add line break
 print(f'Returning to main menu...')
