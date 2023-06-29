@@ -1,4 +1,4 @@
-import pygame, sys, random
+import pygame, sys, random, sqlite3
 from pygame.math import Vector2
 
 class Snake:
@@ -36,6 +36,27 @@ class Snake:
                 return False
         return True
 
+    def game_over(self, name):
+        pygame.quit()
+        self.update_score_in_db(name)
+        sys.exit()
+
+    def update_score_in_db(self, name):
+        conn = sqlite3.connect('snake_game.db')
+        c = conn.cursor()
+
+        c.execute("SELECT score FROM player_score WHERE name = ?", (name,))
+        result = c.fetchone()
+
+        if result is None:
+            c.execute("INSERT INTO player_score (name, score) VALUES (?, ?)", (name, self.score))
+        elif self.score > result[0]:
+            c.execute("UPDATE player_score SET score = ? WHERE name = ?", (self.score, name))
+
+        conn.commit()
+        conn.close()
+
+
 class Snack:
     def __init__(self):
         self.position = Vector2(random.randint(0, cell_number - 1), random.randint(0, cell_number - 1))
@@ -52,6 +73,8 @@ def draw_text(surface, text, size, color, position):
     rect = text_surface.get_rect(center=position)
     surface.blit(text_surface, rect)
 
+name = sys.argv[1]
+
 pygame.init()
 cell_size = 40
 cell_number = 20
@@ -67,8 +90,7 @@ pygame.time.set_timer(SCREEN_UPDATE, 150)
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+            snake.game_over(name)
         if event.type == SCREEN_UPDATE:
             snake.move_snake()
         if event.type == pygame.KEYDOWN:
@@ -82,8 +104,7 @@ while True:
                 snake.direction = Vector2(1,0)
     
     if not snake.check_collision():
-        pygame.quit()
-        sys.exit()
+        snake.game_over(name)
         
     if snake.body[0] == snack.position:
         snake.add_block()
@@ -92,12 +113,9 @@ while True:
     screen.fill(pygame.Color('blue'))
     snake.draw_snake(screen)
     snack.draw_snack(screen)
-    draw_text(screen, f'Score: {snake.score}', 25, pygame.Color('white'), (cell_number * cell_size // 2, cell_size // 2))  # Draw score
+    draw_text(screen, f'Score: {snake.score}', 25, pygame.Color('white'), (cell_number * cell_size // 2, cell_size // 2))
     pygame.display.flip()
     clock.tick(60)
-
-
-
 
 
 
