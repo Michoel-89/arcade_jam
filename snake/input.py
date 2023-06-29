@@ -1,35 +1,231 @@
 import subprocess
 import time
-from pick import pick
+import sqlite3
+
+def create_db():
+    conn = sqlite3.connect('snake_game.db')
+    c = conn.cursor()
+
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS player_score
+        (name TEXT, score INTEGER);
+    ''')
+
+    conn.commit()
+    conn.close()
 
 def get_user_details():
     print("Hello, welcome to the snake game!")
-    name = input("Please, enter your name: ")
+    name = input("Whats was your name again: ")
     city = input("Please, enter your city: ")
     return name, city
 
-def run_game_script():
-    subprocess.call(['python', 'snake/snake_cli.py'])
+def store_name(name):
+    conn = sqlite3.connect('snake_game.db')
+    c = conn.cursor()
+
+    c.execute("SELECT score FROM player_score WHERE name = ?", (name,))
+    result = c.fetchone()
+
+    if result is None:
+        c.execute("INSERT INTO player_score (name, score) VALUES (?, ?)", (name, 0))
+
+    conn.commit()
+    conn.close()
+
+def run_game_script(name):
+    subprocess.call(['python', 'snake/snake_cli.py', name])
+
+def merge_snake_scores():
+    # Connect to the SQLite databases
+    conn_all_scores = sqlite3.connect('all_scores.db')
+    conn_snake_scores = sqlite3.connect('snake_game.db')
+    cursor_all_scores = conn_all_scores.cursor()
+    cursor_snake_scores = conn_snake_scores.cursor()
+
+    # Execute the SQL statement to delete old table
+    cursor_all_scores.execute("DROP TABLE IF EXISTS all_scores")
+
+    # Commit the changes of deleting the table
+    conn_all_scores.commit()
+
+    # Create a new table to store all scores
+    create_table_query = '''
+    CREATE TABLE IF NOT EXISTS all_scores (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE COLLATE NOCASE,
+        trivia_score INTEGER,
+        tictactoe_score DECIMAL,
+        snake_score INTEGER
+    )
+    '''
+    cursor_all_scores.execute(create_table_query)
+
+    # Select the scores from the snake_scores table
+    select_snake_scores_query = '''
+    SELECT name, score FROM player_score
+    '''
+    snake_scores = cursor_snake_scores.execute(select_snake_scores_query).fetchall()
+
+    # Insert or update the scores from the snake_scores table into the all_scores table
+    # If the same username exists, the DO UPDATE clause updates the snake_score value instead of inserting a new row
+    merge_snake_scores_query = '''
+    INSERT INTO all_scores (username, snake_score) VALUES (?, ?)
+    ON CONFLICT (username) DO UPDATE SET snake_score = excluded.snake_score
+    '''
+    cursor_all_scores.executemany(merge_snake_scores_query, snake_scores)
+
+    
+
+    # Commit the changes
+    conn_all_scores.commit()
+
+    # Close the connections
+    conn_all_scores.close()
+    conn_snake_scores.close()
 
 def main():
     name, city = get_user_details()
+    store_name(name)
     print(f'\033[1;34mThanks {name} from {city}, let\'s start the game now.\033[0m')
     time.sleep(5)
-    run_game_script()
-
-    title = 'Please choose a game: '
-    options = ['Tic tac toe', 'Trivia', 'Snake']
-    option, index = pick(options, title)
-    if index == 0:
-        subprocess.call(['python', 'tic_tac_toe/tic_tac_toe.py'])
-    elif index == 1:
-        subprocess.call(['python', 'trivia/trivia_cli.py'])
-    elif index == 2:
-        subprocess.call(['python', 'snake/input.py'])
+    run_game_script(name)
+    merge_snake_scores()
+    subprocess.call(['python', 'main_cli.py'])
 
 if __name__ == "__main__":
+    create_db()
     main()
 
 
+# import subprocess
+# import time
+# import sqlite3
 
+# def create_db():
+#     conn = sqlite3.connect('snake_game.db')
+#     c = conn.cursor()
 
+#     c.execute('''
+#         CREATE TABLE IF NOT EXISTS player_score
+#         (name TEXT, score INTEGER);
+#     ''')
+
+#     conn.commit()
+#     conn.close()
+
+# def get_user_details():
+#     print("Hello, welcome to the snake game!")
+#     name = input("Whats was your name again: ")
+#     city = input("Please, enter your city: ")
+#     return name, city
+
+# def store_name(name):
+#     conn = sqlite3.connect('snake_game.db')
+#     c = conn.cursor()
+
+#     c.execute("SELECT score FROM player_score WHERE name = ?", (name,))
+#     result = c.fetchone()
+
+#     if result is None:
+#         c.execute("INSERT INTO player_score (name, score) VALUES (?, ?)", (name, 0))
+
+#     conn.commit()
+#     conn.close()
+
+# def run_game_script(name):
+#     subprocess.call(['python', 'snake/snake_cli.py', name])
+
+# def merge_snake_scores():
+#     # Connect to the SQLite databases
+#     conn_all_scores = sqlite3.connect('all_scores.db')
+#     conn_snake_scores = sqlite3.connect('snake_game.db')
+#     conn_trivia_scores = sqlite3.connect('trivia_scores.db')
+#     conn_tictactoe_scores = sqlite3.connect('tictactoe_scores.db')
+
+#     cursor_all_scores = conn_all_scores.cursor()
+#     cursor_snake_scores = conn_snake_scores.cursor()
+#     cursor_trivia_scores = conn_trivia_scores.cursor()
+#     cursor_tictactoe_scores = conn_tictactoe_scores.cursor()
+
+#     # Execute the SQL statement to delete old table
+#     cursor_all_scores.execute("DROP TABLE IF EXISTS all_scores")
+
+#     # Commit the changes of deleting the table
+#     conn_all_scores.commit()
+
+#     # Create a new table to store all scores
+#     create_table_query = '''
+#     CREATE TABLE IF NOT EXISTS all_scores (
+#         id INTEGER PRIMARY KEY AUTOINCREMENT,
+#         username TEXT UNIQUE COLLATE NOCASE,
+#         trivia_score INTEGER,
+#         tictactoe_score DECIMAL,
+#         snake_score INTEGER
+#     )
+#     '''
+#     cursor_all_scores.execute(create_table_query)
+
+#     # Select the scores from the snake_scores table
+#     select_snake_scores_query = '''
+#     SELECT name, score FROM player_score
+#     '''
+#     snake_scores = cursor_snake_scores.execute(select_snake_scores_query).fetchall()
+
+#     # Insert or update the scores from the snake_scores table into the all_scores table
+#     # If the same username exists, the DO UPDATE clause updates the snake_score value instead of inserting a new row
+#     merge_snake_scores_query = '''
+#     INSERT INTO all_scores (username, snake_score) VALUES (?, ?)
+#     ON CONFLICT (username) DO UPDATE SET snake_score = excluded.snake_score
+#     '''
+#     cursor_all_scores.executemany(merge_snake_scores_query, snake_scores)
+
+#     # Select the scores from the trivia_scores table
+#     select_trivia_scores_query = '''
+#     SELECT username, trivia_score FROM trivia_scores
+#     '''
+#     trivia_scores = cursor_trivia_scores.execute(select_trivia_scores_query).fetchall()
+
+#     # Insert the scores from the trivia_scores table into the all_scores table
+#     # If the same username exists, the DO UPDATE clause updates the trivia_score value instead of inserting a new row
+#     merge_trivia_scores_query = '''
+#     INSERT INTO all_scores (username, trivia_score) VALUES (?, ?)
+#     ON CONFLICT (username) DO UPDATE SET trivia_score = excluded.trivia_score
+#     '''
+#     cursor_all_scores.executemany(merge_trivia_scores_query, trivia_scores)
+
+#     # Select the scores from the tictactoe_scores table
+#     select_tictactoe_scores_query = '''
+#     SELECT player_name, player_win_percentage FROM tic_tac_toe
+#     '''
+#     tictactoe_scores = cursor_tictactoe_scores.execute(select_tictactoe_scores_query).fetchall()
+
+#     # Insert or update the scores from the tictactoe_scores table into the all_scores table
+#     # If the same username exists, the DO UPDATE clause updates the tictactoe_score value instead of inserting a new row
+#     merge_tictactoe_scores_query = '''
+#     INSERT INTO all_scores (username, tictactoe_score) VALUES (?, ?)
+#     ON CONFLICT (username) DO UPDATE SET tictactoe_score = excluded.tictactoe_score
+#     '''
+#     cursor_all_scores.executemany(merge_tictactoe_scores_query, tictactoe_scores)
+
+#     # Commit the changes
+#     conn_all_scores.commit()
+
+#     # Close the connections
+#     conn_all_scores.close()
+#     conn_snake_scores.close()
+#     conn_trivia_scores.close()
+#     conn_tictactoe_scores.close()
+
+# def main():
+#     create_db()
+#     name, city = get_user_details()
+#     store_name(name)
+#     print(f'\033[1;34mThanks {name} from {city}, let\'s start the game now.\033[0m')
+#     time.sleep(5)
+#     run_game_script(name)
+#     merge_snake_scores()
+#     subprocess.call(['python', 'main_cli.py'])
+
+# if __name__ == "__main__":
+#     main()
