@@ -1,4 +1,3 @@
-# visuals needs work
 import pygame, sys, random
 from pygame.math import Vector2
 
@@ -7,6 +6,7 @@ class Snake:
         self.body = [Vector2(5,10), Vector2(4,10)]
         self.direction = Vector2(1,0)
         self.new_block = False
+        self.score = 0
 
     def move_snake(self):
         if self.new_block:
@@ -19,13 +19,14 @@ class Snake:
 
     def add_block(self):
         self.new_block = True
+        self.score += 1
 
     def draw_snake(self, surface):
         for block in self.body:
              x_pos = int(block.x * cell_size)
              y_pos = int(block.y * cell_size)
              block_rect = pygame.Rect(x_pos, y_pos, cell_size, cell_size)
-             pygame.draw.rect(surface, pygame.Color('hot pink'), block_rect)
+             pygame.draw.rect(surface, pygame.Color('green'), block_rect)
 
     def check_collision(self):
         if not 0 <= self.body[0].x < cell_number or not 0 <= self.body[0].y < cell_number:
@@ -43,7 +44,13 @@ class Snack:
         x_pos = int(self.position.x * cell_size)
         y_pos = int(self.position.y * cell_size)
         snack_rect = pygame.Rect(x_pos, y_pos, cell_size, cell_size)
-        pygame.draw.rect(surface, pygame.Color('red'), snack_rect)
+        pygame.draw.ellipse(surface, pygame.Color('red'), snack_rect)
+
+def draw_text(surface, text, size, color, position):
+    font = pygame.font.SysFont(None, size)
+    text_surface = font.render(text, True, color)
+    rect = text_surface.get_rect(center=position)
+    surface.blit(text_surface, rect)
 
 pygame.init()
 cell_size = 40
@@ -85,8 +92,12 @@ while True:
     screen.fill(pygame.Color('blue'))
     snake.draw_snake(screen)
     snack.draw_snack(screen)
+    draw_text(screen, f'Score: {snake.score}', 25, pygame.Color('white'), (cell_number * cell_size // 2, cell_size // 2))  # Draw score
     pygame.display.flip()
     clock.tick(60)
+
+
+
 
 
 
