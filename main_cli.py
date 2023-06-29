@@ -57,7 +57,7 @@ if index == 0:  # Tic tac toe option
 elif index == 1:  # Trivia option
     subprocess.call(['python', 'trivia/trivia_cli.py'])
 elif index == 2:  # Trivia option
-    subprocess.call(['python', 'snake/snake_cli.py'])
+    subprocess.call(['python', 'snake/input.py'])
 # @click.command()
 # @click.option('--count', default=1, help='Number of greetings.')
 # @click.option('--name', prompt='Enter your name',

@@ -15,7 +15,6 @@ def create_db_and_table():
     # Save (commit) the changes and close the connection
     conn.commit()
     conn.close()
-
 def add_score(name, score):
     conn = sqlite3.connect('game_scores.db')
     c = conn.cursor()
