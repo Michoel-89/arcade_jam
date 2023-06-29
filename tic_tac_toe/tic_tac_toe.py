@@ -210,5 +210,15 @@ conn_all_scores.commit()
 conn_all_scores.close()
 conn_trivia_scores.close()
 conn_tictactoe_scores.close()
+# Return to main menu
+import time
+import subprocess
 
+print()  # Add line break
+print()  # Add line break
+print(f'Returning to the main menu...')
+
+time.sleep(5)  # Wait for 5 seconds
+
+subprocess.call(['python', './main_cli.py'])
 
