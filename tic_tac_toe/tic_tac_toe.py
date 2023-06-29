@@ -216,9 +216,15 @@ import subprocess
 
 print()  # Add line break
 print()  # Add line break
-print(f'Returning to the main menu...')
-
-time.sleep(5)  # Wait for 5 seconds
-
-subprocess.call(['python', './main_cli.py'])
+def continue_playing():
+    print('Press "enter" to return to main menu or "q" to quit')
+    answer = input("Do you want to keep playing? ")
+    if(answer == ''):
+        print(f'Returning to the main menu...')
+        time.sleep(3)  # Wait for 3 seconds
+        subprocess.call(['python', './main_cli.py'])
+    if(answer == 'q'):
+        print('Exiting Arcade JAM...')
+        quit()
+continue_playing()
 
