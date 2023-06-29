@@ -1,4 +1,4 @@
-# visuals needs work
+snake_cli.py
 import pygame, sys, random
 from pygame.math import Vector2
 
