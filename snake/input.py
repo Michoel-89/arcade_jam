@@ -93,12 +93,24 @@ def main():
     time.sleep(5)
     run_game_script(name)
     merge_snake_scores()
-    subprocess.call(['python', 'main_cli.py'])
 
 if __name__ == "__main__":
     create_db()
     main()
 
+print()  # Add line break
+print()  # Add line break
+def continue_playing():
+    print('Press "enter" to return to main menu or "q" to quit')
+    answer = input("Do you want to keep playing? ")
+    if(answer == ''):
+        print(f'Returning to the main menu...')
+        time.sleep(3)  # Wait for 3 seconds
+        subprocess.call(['python', './main_cli.py'])
+    if(answer == 'q'):
+        print('Exiting Arcade JAM...')
+        quit()
+continue_playing()
 
 # import subprocess
 # import time
