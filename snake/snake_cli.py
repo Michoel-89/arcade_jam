@@ -1,5 +1,8 @@
 import pygame, sys, random, sqlite3
 from pygame.math import Vector2
+import subprocess
+
+subprocess.call(['python', './snake_ascii.py'])
 
 class Snake:
     def __init__(self):

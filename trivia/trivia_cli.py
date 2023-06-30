@@ -1,6 +1,10 @@
 import sqlite3
 import random
+import subprocess
+import time
 from trivia_questions import questions
+
+subprocess.call(['python', './trivia_ascii.py'])
 
 # Connect to the SQLite database
 conn_trivia_scores = sqlite3.connect('trivia/trivia_scores.db')
@@ -193,9 +197,6 @@ conn_trivia_scores.close()
 conn_tictactoe_scores.close()
 
 # Return to main menu
-import time
-import subprocess
-
 print()  # Add line break
 print()  # Add line break
 def continue_playing():

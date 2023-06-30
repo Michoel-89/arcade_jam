@@ -1,5 +1,7 @@
 from create_table import Game, session
+import subprocess
 
+subprocess.call(['python', './tictactoe_ascii.py'])
 
 # Initialize the board the underscore is not being used it's just there as a placeholder
 board = [" " for _ in range(9)]
@@ -212,7 +214,6 @@ conn_trivia_scores.close()
 conn_tictactoe_scores.close()
 # Return to main menu
 import time
-import subprocess
 
 print()  # Add line break
 print()  # Add line break
