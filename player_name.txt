@@ -1,5 +1,1 @@
-<<<<<<< HEAD
 michoel
-=======
-exit
->>>>>>> 56d41bc (snake game mod and pathways added)
