@@ -2,6 +2,8 @@ import subprocess
 import time
 import sqlite3
 
+subprocess.call(['python', './snake_ascii.py'])
+
 def create_db():
     conn = sqlite3.connect('snake_game.db')
     c = conn.cursor()
