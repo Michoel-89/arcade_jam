@@ -1,3 +1,4 @@
+# tutorial code: https://github.com/kiteco/python-youtube-code/blob/master/ascii/ascii_convert.py
 import cv2
 
 # ascii characters used to build the output text
